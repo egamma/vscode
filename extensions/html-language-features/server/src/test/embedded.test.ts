@@ -116,6 +116,7 @@ suite('HTML Embedded Support', () => {
 		assertLanguageId('<label on="|Checkbox"/>', 'html');
 		assertLanguageId('<div onInvalidAttribute="|test test"></div>', 'html');
 		assertLanguageId('<div onclick="|test test"></div>', 'javascript');
+		assertLanguageId('<body onbeforeunload="|return false"></body>', 'javascript');
 	});
 
 	test('Script content', function (): any {
@@ -127,6 +128,7 @@ suite('HTML Embedded Support', () => {
 		assertEmbeddedLanguageContent('<script>var data=100; <!--this comment should not give error--> </script>', 'javascript', '        var data=100; /* this comment should not give error */          ');
 		assertEmbeddedLanguageContent('<div onKeyUp="foo()" onkeydown="bar()"/>', 'javascript', '              foo();            bar();  ');
 		assertEmbeddedLanguageContent('<div onKeyUp="return"/>', 'javascript', '              return;  ');
+		assertEmbeddedLanguageContent('<body onbeforeunload="return false"></body>', 'javascript', '                      return false;        ');
 		assertEmbeddedLanguageContent('<div onKeyUp=return\n/><script>foo();</script>', 'javascript', '             return;\n          foo();         ');
 	});
 
