@@ -22,6 +22,104 @@ export const CSS_STYLE_RULE = '__';
 
 interface EmbeddedRegion { languageId: string | undefined; start: number; end: number; attributeValue?: boolean }
 
+const eventHandlerAttributes = new Set([
+	'onabort',
+	'onanimationcancel',
+	'onanimationend',
+	'onanimationiteration',
+	'onanimationstart',
+	'onauxclick',
+	'onbeforeinput',
+	'onbeforematch',
+	'onbeforetoggle',
+	'onblur',
+	'oncancel',
+	'oncanplay',
+	'oncanplaythrough',
+	'onchange',
+	'onclick',
+	'onclose',
+	'oncontextlost',
+	'oncontextmenu',
+	'oncontextrestored',
+	'oncopy',
+	'oncuechange',
+	'oncut',
+	'ondblclick',
+	'ondrag',
+	'ondragend',
+	'ondragenter',
+	'ondragleave',
+	'ondragover',
+	'ondragstart',
+	'ondrop',
+	'ondurationchange',
+	'onemptied',
+	'onended',
+	'onerror',
+	'onfocus',
+	'onformdata',
+	'ongotpointercapture',
+	'oninput',
+	'oninvalid',
+	'onkeydown',
+	'onkeypress',
+	'onkeyup',
+	'onlanguagechange',
+	'onload',
+	'onloadeddata',
+	'onloadedmetadata',
+	'onloadstart',
+	'onlostpointercapture',
+	'onmousedown',
+	'onmouseenter',
+	'onmouseleave',
+	'onmousemove',
+	'onmouseout',
+	'onmouseover',
+	'onmouseup',
+	'onpaste',
+	'onpause',
+	'onplay',
+	'onplaying',
+	'onpointercancel',
+	'onpointerdown',
+	'onpointerenter',
+	'onpointerleave',
+	'onpointermove',
+	'onpointerout',
+	'onpointerover',
+	'onpointerrawupdate',
+	'onpointerup',
+	'onprogress',
+	'onratechange',
+	'onreset',
+	'onresize',
+	'onscroll',
+	'onscrollend',
+	'onsecuritypolicyviolation',
+	'onseeked',
+	'onseeking',
+	'onselect',
+	'onslotchange',
+	'onstalled',
+	'onsubmit',
+	'onsuspend',
+	'ontimeupdate',
+	'ontoggle',
+	'ontouchcancel',
+	'ontouchend',
+	'ontouchmove',
+	'ontouchstart',
+	'ontransitioncancel',
+	'ontransitionend',
+	'ontransitionrun',
+	'ontransitionstart',
+	'onvolumechange',
+	'onwaiting',
+	'onwheel'
+]);
+
 
 export function getDocumentRegions(languageService: LanguageService, document: TextDocument): HTMLDocumentRegions {
 	const regions: EmbeddedRegion[] = [];
@@ -243,9 +341,8 @@ function append(result: string, str: string, n: number): string {
 }
 
 function getAttributeLanguage(attributeName: string): string | null {
-	const match = attributeName.match(/^(style)$|^(on\w+)$/i);
-	if (!match) {
-		return null;
+	if (attributeName.toLowerCase() === 'style') {
+		return 'css';
 	}
-	return match[1] ? 'css' : 'javascript';
+	return eventHandlerAttributes.has(attributeName.toLowerCase()) ? 'javascript' : null;
 }

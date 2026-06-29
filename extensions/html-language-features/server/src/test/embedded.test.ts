@@ -114,6 +114,8 @@ suite('HTML Embedded Support', () => {
 
 		assertLanguageId('<label data-content="|Checkbox"/>', 'html');
 		assertLanguageId('<label on="|Checkbox"/>', 'html');
+		assertLanguageId('<div onInvalidAttribute="|test test"></div>', 'html');
+		assertLanguageId('<div onclick="|test test"></div>', 'javascript');
 	});
 
 	test('Script content', function (): any {
