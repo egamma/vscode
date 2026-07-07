@@ -311,21 +311,7 @@ export class ParameterHintsWidget extends Disposable implements IContentWidget {
 	}
 
 	private getParameterLabelOffsets(signature: languages.SignatureInformation, paramIdx: number): [number, number] {
-		const param = signature.parameters[paramIdx];
-		if (!param) {
-			return [0, 0];
-		} else if (Array.isArray(param.label)) {
-			return param.label;
-		} else if (!param.label.length) {
-			return [0, 0];
-		} else {
-			const regex = new RegExp(`(\\W|^)${escapeRegExpCharacters(param.label)}(?=\\W|$)`, 'g');
-			regex.test(signature.label);
-			const idx = regex.lastIndex - param.label.length;
-			return idx >= 0
-				? [idx, regex.lastIndex]
-				: [0, 0];
-		}
+		return getParameterLabelOffsets(signature, paramIdx);
 	}
 
 	next(): void {
@@ -361,6 +347,48 @@ export class ParameterHintsWidget extends Disposable implements IContentWidget {
 		if (wrapper.length) {
 			wrapper[0].style.maxHeight = maxHeight;
 		}
+	}
+}
+
+/**
+ * Computes the [start, end) offsets of the parameter label within the signature label string.
+ * Accounts for earlier parameters so that duplicate names are resolved to the correct occurrence.
+ */
+export function getParameterLabelOffsets(signature: languages.SignatureInformation, paramIdx: number): [number, number] {
+	const param = signature.parameters[paramIdx];
+	if (!param) {
+		return [0, 0];
+	} else if (Array.isArray(param.label)) {
+		return param.label;
+	} else if (!param.label.length) {
+		return [0, 0];
+	} else {
+		// Determine a search start offset by finding the end of the previous parameter's position.
+		// This prevents matching a parameter name that appears in an earlier part of the label.
+		let searchStart = 0;
+		for (let i = 0; i < paramIdx; i++) {
+			const prev = signature.parameters[i];
+			if (!prev) {
+				break;
+			}
+			if (Array.isArray(prev.label)) {
+				searchStart = Math.max(searchStart, prev.label[1]);
+			} else if (prev.label.length) {
+				const prevRegex = new RegExp(`(\\W|^)${escapeRegExpCharacters(prev.label)}(?=\\W|$)`, 'g');
+				prevRegex.lastIndex = searchStart;
+				if (prevRegex.test(signature.label)) {
+					searchStart = prevRegex.lastIndex;
+				}
+			}
+		}
+
+		const regex = new RegExp(`(\\W|^)${escapeRegExpCharacters(param.label)}(?=\\W|$)`, 'g');
+		regex.lastIndex = searchStart;
+		regex.test(signature.label);
+		const idx = regex.lastIndex - param.label.length;
+		return idx >= searchStart
+			? [idx, regex.lastIndex]
+			: [0, 0];
 	}
 }
 
