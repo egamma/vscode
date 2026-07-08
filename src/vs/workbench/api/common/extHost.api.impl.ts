@@ -595,9 +595,11 @@ export function createApiFactoryAndRegisterActors(accessor: ServicesAccessor): I
 		const extensionKind = initData.remote.isRemote
 			? extHostTypes.ExtensionKind.Workspace
 			: extHostTypes.ExtensionKind.UI;
-		const foreignExtensionKind = initData.remote.isRemote
-			? extHostTypes.ExtensionKind.UI
-			: extHostTypes.ExtensionKind.Workspace;
+		function extensionDescriptionKind(desc: IExtensionDescription): vscode.ExtensionKind {
+			return desc.extensionLocation.scheme === Schemas.vscodeRemote
+				? extHostTypes.ExtensionKind.Workspace
+				: extHostTypes.ExtensionKind.UI;
+		}
 
 		const extensions: typeof vscode.extensions = {
 			getExtension(extensionId: string, includeFromDifferentExtensionHosts?: boolean): vscode.Extension<any> | undefined {
@@ -611,7 +613,7 @@ export function createApiFactoryAndRegisterActors(accessor: ServicesAccessor): I
 				if (includeFromDifferentExtensionHosts) {
 					const foreign = extensionInfo.all.getExtensionDescription(extensionId);
 					if (foreign) {
-						return new Extension(extensionService, extension.identifier, foreign, foreignExtensionKind, true);
+						return new Extension(extensionService, extension.identifier, foreign, extensionDescriptionKind(foreign), true);
 					}
 				}
 				return undefined;
@@ -629,7 +631,7 @@ export function createApiFactoryAndRegisterActors(accessor: ServicesAccessor): I
 				const result: vscode.Extension<any>[] = [];
 				for (const desc of extensionInfo.all.getAllExtensionDescriptions()) {
 					const isFromDifferentExtensionHost = !local.has(desc.identifier);
-					result.push(new Extension(extensionService, extension.identifier, desc, isFromDifferentExtensionHost ? foreignExtensionKind : extensionKind, isFromDifferentExtensionHost));
+					result.push(new Extension(extensionService, extension.identifier, desc, isFromDifferentExtensionHost ? extensionDescriptionKind(desc) : extensionKind, isFromDifferentExtensionHost));
 				}
 				return result;
 			},
