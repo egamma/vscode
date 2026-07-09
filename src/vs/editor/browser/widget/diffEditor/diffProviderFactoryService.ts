@@ -154,7 +154,13 @@ export class WorkerBasedDocumentDiffProvider implements IDocumentDiffProvider, I
 		// If the advanced algorithm timed out, retry with the legacy algorithm
 		if (result.quitEarly && typeof this.diffAlgorithm === 'string' && this.diffAlgorithm !== 'legacy') {
 			const legacyResult = await this.editorWorkerService.computeDiff(original.uri, modified.uri, options, 'legacy');
-			if (!cancellationToken.isCancellationRequested && legacyResult) {
+			if (cancellationToken.isCancellationRequested) {
+				return { changes: [], identical: false, quitEarly: true, moves: [] };
+			}
+			if (legacyResult) {
+				if (WorkerBasedDocumentDiffProvider.diffCache.size > 10) {
+					WorkerBasedDocumentDiffProvider.diffCache.delete(WorkerBasedDocumentDiffProvider.diffCache.keys().next().value!);
+				}
 				WorkerBasedDocumentDiffProvider.diffCache.set(uriKey, { result: legacyResult, context });
 				return legacyResult;
 			}
