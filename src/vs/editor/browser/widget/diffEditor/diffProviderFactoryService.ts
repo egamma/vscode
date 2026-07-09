@@ -151,9 +151,19 @@ export class WorkerBasedDocumentDiffProvider implements IDocumentDiffProvider, I
 			throw new Error('no diff result available');
 		}
 
-		// If the advanced algorithm timed out, retry with the legacy algorithm
+		// If the advanced algorithm timed out, retry with the legacy algorithm using remaining budget
 		if (result.quitEarly && typeof this.diffAlgorithm === 'string' && this.diffAlgorithm !== 'legacy') {
-			const legacyResult = await this.editorWorkerService.computeDiff(original.uri, modified.uri, options, 'legacy');
+			const remainingTimeMs = options.maxComputationTimeMs - timeMs;
+			if (remainingTimeMs <= 0) {
+				// Budget exhausted, skip the fallback
+				if (WorkerBasedDocumentDiffProvider.diffCache.size > 10) {
+					WorkerBasedDocumentDiffProvider.diffCache.delete(WorkerBasedDocumentDiffProvider.diffCache.keys().next().value!);
+				}
+				WorkerBasedDocumentDiffProvider.diffCache.set(uriKey, { result, context });
+				return result;
+			}
+			const legacyOptions = { ...options, maxComputationTimeMs: remainingTimeMs };
+			const legacyResult = await this.editorWorkerService.computeDiff(original.uri, modified.uri, legacyOptions, 'legacy');
 			if (cancellationToken.isCancellationRequested) {
 				return { changes: [], identical: false, quitEarly: true, moves: [] };
 			}
