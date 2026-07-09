@@ -6,8 +6,10 @@
 import assert from 'assert';
 import { ensureNoDisposablesAreLeakedInTestSuite } from '../../../../base/test/common/utils.js';
 import { UnchangedRegion } from '../../../browser/widget/diffEditor/diffEditorViewModel.js';
+import { DiffEditorOptions } from '../../../browser/widget/diffEditor/diffEditorOptions.js';
 import { LineRange } from '../../../common/core/ranges/lineRange.js';
 import { DetailedLineRangeMapping } from '../../../common/diff/rangeMapping.js';
+import { TestAccessibilityService } from '../../../../platform/accessibility/test/common/testAccessibilityService.js';
 
 suite('DiffEditorWidget2', () => {
 
@@ -61,6 +63,46 @@ suite('DiffEditorWidget2', () => {
 				3,
 				3,
 			)), (['[1,96) - [1,96)']));
+		});
+	});
+
+	suite('DiffEditorOptions - word wrap in inline mode', () => {
+
+		test('diffWordWrap "on" is respected in inline mode (original editor should wrap)', () => {
+			const accessibilityService = new TestAccessibilityService();
+			const options = new DiffEditorOptions(
+				{ renderSideBySide: false, diffWordWrap: 'on' },
+				accessibilityService,
+			);
+
+			// In inline mode, renderSideBySide is false
+			assert.strictEqual(options.renderSideBySide.get(), false);
+			// diffWordWrap is 'on' — this value is used as wordWrapOverride1
+			// for the original (left) editor in _adjustOptionsForLeftHandSide.
+			// Before the fix, this was always overridden to 'off' in inline mode.
+			assert.strictEqual(options.diffWordWrap.get(), 'on');
+		});
+
+		test('diffWordWrap "off" disables wrap in inline mode', () => {
+			const accessibilityService = new TestAccessibilityService();
+			const options = new DiffEditorOptions(
+				{ renderSideBySide: false, diffWordWrap: 'off' },
+				accessibilityService,
+			);
+
+			assert.strictEqual(options.renderSideBySide.get(), false);
+			assert.strictEqual(options.diffWordWrap.get(), 'off');
+		});
+
+		test('diffWordWrap "inherit" is passed through in inline mode', () => {
+			const accessibilityService = new TestAccessibilityService();
+			const options = new DiffEditorOptions(
+				{ renderSideBySide: false, diffWordWrap: 'inherit' },
+				accessibilityService,
+			);
+
+			assert.strictEqual(options.renderSideBySide.get(), false);
+			assert.strictEqual(options.diffWordWrap.get(), 'inherit');
 		});
 	});
 });

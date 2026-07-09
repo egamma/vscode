@@ -138,8 +138,8 @@ export class DiffEditorEditors extends Disposable {
 	private _adjustOptionsForLeftHandSide(_reader: IReader | undefined, changedOptions: Readonly<IDiffEditorConstructionOptions>): IEditorConstructionOptions {
 		const result = this._adjustOptionsForSubEditor(changedOptions);
 		if (!this._options.renderSideBySide.get()) {
-			// never wrap hidden editor
-			result.wordWrapOverride1 = 'off';
+			// In inline mode, allow word wrap for deleted lines to be visible
+			result.wordWrapOverride1 = this._options.diffWordWrap.get();
 			result.wordWrapOverride2 = 'off';
 			result.stickyScroll = { enabled: false };
 
