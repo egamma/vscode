@@ -5759,6 +5759,26 @@ suite('Editor Controller', () => {
 		});
 	});
 
+	test('issue #315131 - Completion-inserted () tracked as auto-closed pair when source is suggest', () => {
+		usingCursor({
+			text: [
+				'math.fl'
+			],
+			languageId: autoClosingLanguageId
+		}, (editor, model, viewModel) => {
+			viewModel.setSelections('test', [new Selection(1, 8, 1, 8)]);
+
+			// Simulate a suggest completion that inserts 'floor()' with cursor between parens
+			viewModel.executeEdits('suggest', [{ range: new Range(1, 6, 1, 8), text: 'floor()' }], () => [new Selection(1, 11, 1, 11)], EditSources.suggest({ providerId: undefined }));
+			assert.strictEqual(model.getLineContent(1), 'math.floor()');
+			assertCursor(viewModel, new Position(1, 11));
+
+			// Backspace should delete both parens since they are tracked as an auto-closed pair
+			editor.runCommand(CoreEditingCommands.DeleteLeft, null);
+			assert.strictEqual(model.getLineContent(1), 'math.floor');
+		});
+	});
+
 	test('issue #78833 - Add config to use old brackets/quotes overtyping', () => {
 		usingCursor({
 			text: [

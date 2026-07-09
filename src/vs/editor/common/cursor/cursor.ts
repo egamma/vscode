@@ -466,7 +466,7 @@ export class CursorsController extends Disposable {
 
 	public executeEdits(eventsCollector: ViewModelEventsCollector, source: string | null | undefined, edits: IIdentifiedSingleEditOperation[], cursorStateComputer: ICursorStateComputer, reason: TextModelEditSource): void {
 		let autoClosingIndices: [number, number][] | null = null;
-		if (source === 'snippet') {
+		if (source === 'snippet' || source === 'suggest') {
 			autoClosingIndices = this._findAutoClosingPairs(edits);
 		}
 
