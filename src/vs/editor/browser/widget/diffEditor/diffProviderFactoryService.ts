@@ -153,8 +153,8 @@ export class WorkerBasedDocumentDiffProvider implements IDocumentDiffProvider, I
 
 		// If the advanced algorithm timed out, retry with the legacy algorithm using remaining budget
 		if (result.quitEarly && typeof this.diffAlgorithm === 'string' && this.diffAlgorithm !== 'legacy') {
-			const remainingTimeMs = options.maxComputationTimeMs - timeMs;
-			if (remainingTimeMs <= 0) {
+			const remainingTimeMs = options.maxComputationTimeMs === 0 ? 0 : options.maxComputationTimeMs - timeMs;
+			if (remainingTimeMs < 0) {
 				// Budget exhausted, skip the fallback
 				if (WorkerBasedDocumentDiffProvider.diffCache.size > 10) {
 					WorkerBasedDocumentDiffProvider.diffCache.delete(WorkerBasedDocumentDiffProvider.diffCache.keys().next().value!);
