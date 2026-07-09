@@ -66,43 +66,23 @@ suite('DiffEditorWidget2', () => {
 		});
 	});
 
-	suite('DiffEditorOptions - word wrap in inline mode', () => {
+	suite('DiffEditorOptions - diffWordWrap storage', () => {
 
-		test('diffWordWrap "on" is respected in inline mode (original editor should wrap)', () => {
+		test('stores diffWordWrap values correctly', () => {
 			const accessibilityService = new TestAccessibilityService();
-			const options = new DiffEditorOptions(
-				{ renderSideBySide: false, diffWordWrap: 'on' },
-				accessibilityService,
-			);
 
-			// In inline mode, renderSideBySide is false
-			assert.strictEqual(options.renderSideBySide.get(), false);
-			// diffWordWrap is 'on' — this value is used as wordWrapOverride1
-			// for the original (left) editor in _adjustOptionsForLeftHandSide.
-			// Before the fix, this was always overridden to 'off' in inline mode.
-			assert.strictEqual(options.diffWordWrap.get(), 'on');
-		});
+			for (const value of ['on', 'off', 'inherit'] as const) {
+				const options = new DiffEditorOptions(
+					{ renderSideBySide: false, diffWordWrap: value },
+					accessibilityService,
+				);
 
-		test('diffWordWrap "off" disables wrap in inline mode', () => {
-			const accessibilityService = new TestAccessibilityService();
-			const options = new DiffEditorOptions(
-				{ renderSideBySide: false, diffWordWrap: 'off' },
-				accessibilityService,
-			);
-
-			assert.strictEqual(options.renderSideBySide.get(), false);
-			assert.strictEqual(options.diffWordWrap.get(), 'off');
-		});
-
-		test('diffWordWrap "inherit" is passed through in inline mode', () => {
-			const accessibilityService = new TestAccessibilityService();
-			const options = new DiffEditorOptions(
-				{ renderSideBySide: false, diffWordWrap: 'inherit' },
-				accessibilityService,
-			);
-
-			assert.strictEqual(options.renderSideBySide.get(), false);
-			assert.strictEqual(options.diffWordWrap.get(), 'inherit');
+				assert.strictEqual(options.diffWordWrap.get(), value);
+				// Note: in inline mode, _adjustOptionsForLeftHandSide (on DiffEditorEditors)
+				// forces wordWrapOverride1/2 to 'off' for the original editor regardless of
+				// this value, because the original editor is hidden.
+				options.dispose();
+			}
 		});
 	});
 });
