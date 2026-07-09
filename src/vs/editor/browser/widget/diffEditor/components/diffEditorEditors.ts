@@ -138,9 +138,8 @@ export class DiffEditorEditors extends Disposable {
 	private _adjustOptionsForLeftHandSide(_reader: IReader | undefined, changedOptions: Readonly<IDiffEditorConstructionOptions>): IEditorConstructionOptions {
 		const result = this._adjustOptionsForSubEditor(changedOptions);
 		if (!this._options.renderSideBySide.get()) {
-			// never wrap hidden editor
-			result.wordWrapOverride1 = 'off';
-			result.wordWrapOverride2 = 'off';
+			result.wordWrapOverride1 = this._options.diffWordWrap.get();
+			result.wordWrapOverride2 = this._options.diffWordWrap.get();
 			result.stickyScroll = { enabled: false };
 
 			// Disable unicode highlighting for the original side in inline mode, as they are not shown anyway.
@@ -148,6 +147,7 @@ export class DiffEditorEditors extends Disposable {
 		} else {
 			result.unicodeHighlight = this._options.editorOptions.get().unicodeHighlight || {};
 			result.wordWrapOverride1 = this._options.diffWordWrap.get();
+			result.wordWrapOverride2 = this._options.diffWordWrap.get();
 		}
 		result.glyphMargin = this._options.renderSideBySide.get();
 
