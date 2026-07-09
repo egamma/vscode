@@ -49,7 +49,8 @@ function getDataToCopy(viewModel: IViewModel, modelSelections: Range[], emptySel
 
 	const isFromEmptySelection = (emptySelectionClipboard && modelSelections.length === 1 && modelSelections[0].isEmpty());
 	const multicursorText = (Array.isArray(sourceText) ? sourceText : null);
-	const text = (Array.isArray(sourceText) ? sourceText.join(multicursorText?.every(t => t.endsWith(newLineCharacter)) ? '' : newLineCharacter) : sourceText);
+	const allSelectionsEmpty = modelSelections.every(s => s.isEmpty());
+	const text = (Array.isArray(sourceText) ? sourceText.join(emptySelectionClipboard && allSelectionsEmpty && multicursorText?.every(t => t.endsWith(newLineCharacter)) ? '' : newLineCharacter) : sourceText);
 
 	let html: string | null | undefined = undefined;
 	let mode: string | null = null;
