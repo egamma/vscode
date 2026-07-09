@@ -138,10 +138,10 @@ export class DiffEditorEditors extends Disposable {
 	private _adjustOptionsForLeftHandSide(_reader: IReader | undefined, changedOptions: Readonly<IDiffEditorConstructionOptions>): IEditorConstructionOptions {
 		const result = this._adjustOptionsForSubEditor(changedOptions);
 		if (!this._options.renderSideBySide.get()) {
-			// In inline mode, use wordWrapOverride2 (highest priority) so it is not overridden
-			const diffWordWrap = this._options.diffWordWrap.get();
+			// In inline mode, the original editor is hidden (laid out at gutter width or 0),
+			// so wrapping must stay disabled to avoid inflating alignment/height calculations.
 			result.wordWrapOverride1 = 'off';
-			result.wordWrapOverride2 = diffWordWrap;
+			result.wordWrapOverride2 = 'off';
 			result.stickyScroll = { enabled: false };
 
 			// Disable unicode highlighting for the original side in inline mode, as they are not shown anyway.
