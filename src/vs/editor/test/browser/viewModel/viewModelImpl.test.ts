@@ -252,6 +252,30 @@ suite('ViewModel', () => {
 		);
 	});
 
+	test('issue #324290: copying multiple empty selections should not produce blank lines when pasted into a single cursor', () => {
+		// When copying 3 empty selections (full lines) and pasting into a single cursor,
+		// the resulting text should not have double newlines between entries.
+		const text = ['line1', 'line2', 'line3'];
+		testViewModel(text, {}, (viewModel, model) => {
+			const newLineCharacter = model.getEOL();
+			const ranges = [
+				new Range(1, 1, 1, 1),
+				new Range(2, 1, 2, 1),
+				new Range(3, 1, 3, 1),
+			];
+			const actual = viewModel.getPlainTextToCopy(ranges, true, false);
+			// sourceText should be an array with trailing newlines
+			assert.deepStrictEqual(actual.sourceText, ['line1\n', 'line2\n', 'line3\n']);
+			// When joined for single-cursor paste (as clipboardUtils does),
+			// entries already ending with newline should not get an extra separator
+			const sourceText = actual.sourceText as string[];
+			const joined = sourceText.every(t => t.endsWith(newLineCharacter))
+				? sourceText.join('')
+				: sourceText.join(newLineCharacter);
+			assert.strictEqual(joined, 'line1\nline2\nline3\n');
+		});
+	});
+
 	test('getPlainTextToCopy 1/2', () => {
 		assertGetPlainTextToCopy(
 			USUAL_TEXT,
