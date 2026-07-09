@@ -138,9 +138,10 @@ export class DiffEditorEditors extends Disposable {
 	private _adjustOptionsForLeftHandSide(_reader: IReader | undefined, changedOptions: Readonly<IDiffEditorConstructionOptions>): IEditorConstructionOptions {
 		const result = this._adjustOptionsForSubEditor(changedOptions);
 		if (!this._options.renderSideBySide.get()) {
-			// In inline mode, allow word wrap for deleted lines to be visible
-			result.wordWrapOverride1 = this._options.diffWordWrap.get();
-			result.wordWrapOverride2 = 'off';
+			// In inline mode, use wordWrapOverride2 (highest priority) so it is not overridden
+			const diffWordWrap = this._options.diffWordWrap.get();
+			result.wordWrapOverride1 = 'off';
+			result.wordWrapOverride2 = diffWordWrap;
 			result.stickyScroll = { enabled: false };
 
 			// Disable unicode highlighting for the original side in inline mode, as they are not shown anyway.
