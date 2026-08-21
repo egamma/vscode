@@ -114,6 +114,9 @@ suite('HTML Embedded Support', () => {
 
 		assertLanguageId('<label data-content="|Checkbox"/>', 'html');
 		assertLanguageId('<label on="|Checkbox"/>', 'html');
+		assertLanguageId('<div onInvalidAttribute="|test test"></div>', 'html');
+		assertLanguageId('<div onclick="|test test"></div>', 'javascript');
+		assertLanguageId('<body onbeforeunload="|return false"></body>', 'javascript');
 	});
 
 	test('Script content', function (): any {
@@ -129,6 +132,7 @@ suite('HTML Embedded Support', () => {
 		assertEmbeddedLanguageContent('<script><!--a--> foo(); <!--b--></script>', 'javascript', '        /* a */ foo(); /* b */         ');
 		assertEmbeddedLanguageContent('<div onKeyUp="foo()" onkeydown="bar()"/>', 'javascript', '              foo();            bar();  ');
 		assertEmbeddedLanguageContent('<div onKeyUp="return"/>', 'javascript', '              return;  ');
+		assertEmbeddedLanguageContent('<body onbeforeunload="return false"></body>', 'javascript', '                      return false;        ');
 		assertEmbeddedLanguageContent('<div onKeyUp=return\n/><script>foo();</script>', 'javascript', '             return;\n          foo();         ');
 	});
 
